@@ -16,7 +16,7 @@ on:
         default: false
       DESTROY_ON_MERGE:
         required: false
-        type: string
+        type: boolean
         default: false
     secrets:
       AWS_ACCESS_KEY_ID:
@@ -56,5 +56,5 @@ jobs:
         run: terraform apply -auto-approve "tfplan"
       
       - name: destroy
-        if: env.DESTROY_ON_MERGE == 'TRUE' && github.ref == 'refs/heads/main'
+        if: env.DESTROY_ON_MERGE && github.ref == 'refs/heads/main'
         run: terraform destroy -input=false -auto-approve
