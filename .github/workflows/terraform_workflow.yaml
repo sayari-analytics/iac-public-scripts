@@ -50,7 +50,10 @@ jobs:
 
       - name: plan
         id: plan
-        run: terraform plan -out="tfplan"
+        run: |
+          terraform plan -out="tfplan"
+          echo APPLY_ON_PR is ${APPLY_ON_PR}
+          echo DESTROY_ON_MERGE is ${DESTROY_ON_MERGE}
 
       - name: apply
         if: env.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main'
