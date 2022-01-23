@@ -10,6 +10,10 @@ on:
         required: false
         type: string
         default: "."
+      DESTROY_ON_MERGE:
+        required: false
+        type: string
+        default: false
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -32,7 +36,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: init
-        run: terraform init
+        run: |
+          terraform init
+          echo "DESTROY_ON_MERGE=${DESTROY_ON_MERGE}" >> $GITHUB_ENV
 
       - name: validate
         run: terraform validate -no-color
@@ -44,3 +50,7 @@ jobs:
       - name: apply
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve "tfplan"
+      
+      - name: destroy
+        if: env.DESTROY_ON_MERGE == 'TRUE' && github.ref == 'refs/heads/main'
+        run: terraform destroy -input=false -auto-approve
