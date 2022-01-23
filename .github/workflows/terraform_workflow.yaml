@@ -10,6 +10,10 @@ on:
         required: false
         type: string
         default: "."
+      APPLY_ON_PR:
+        required: false
+        type: boolean
+        default: false
       DESTROY_ON_MERGE:
         required: false
         type: string
@@ -48,7 +52,7 @@ jobs:
         run: terraform plan -out="tfplan"
 
       - name: apply
-        if: github.ref == 'refs/heads/main'
+        if: env.APPLY_ON_PR || github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve "tfplan"
       
       - name: destroy
