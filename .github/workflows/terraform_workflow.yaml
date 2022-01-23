@@ -42,20 +42,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: init
-        run: |
-          terraform init
-          echo "APPLY_ON_PR=${APPLY_ON_PR:=false}" >> $GITHUB_ENV
-          echo "DESTROY_ON_MERGE=${DESTROY_ON_MERGE:=false}" >> $GITHUB_ENV
+        run: terraform init
 
       - name: validate
         run: terraform validate -no-color
 
       - name: plan
         id: plan
-        run: |
-          terraform plan -out="tfplan"
-          echo APPLY_ON_PR is ${APPLY_ON_PR}
-          echo DESTROY_ON_MERGE is ${DESTROY_ON_MERGE}
+        run: terraform plan -out="tfplan"
 
       - name: apply
         if: env.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main'
