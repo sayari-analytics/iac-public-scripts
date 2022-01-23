@@ -12,12 +12,12 @@ on:
         default: "."
       APPLY_ON_PR:
         required: false
-        type: boolean
-        default: false
+        type: string
+        default: 'false'
       DESTROY_ON_MERGE:
         required: false
-        type: boolean
-        default: false
+        type: string
+        default: 'false'
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
