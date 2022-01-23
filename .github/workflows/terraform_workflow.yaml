@@ -2,7 +2,7 @@ name: provision resources
 
 defaults:
   run:
-    working-directory: "sayari"
+    working-directory: ${{ inputs.WORKING_DIRECTORY }}
 
 on:
   workflow_call:
