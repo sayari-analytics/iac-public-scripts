@@ -2,13 +2,16 @@ name: provision resources
 
 defaults:
   run:
-    working-directory: ${{ inputs.WORKING_DIRECTORY }}
+    working-directory: ${{ inputs.WORKING_DIRECTORY | "." }}
 
 on:
   workflow_call:
     inputs:
       AWS_REGION:
         required: true
+        type: string
+      WORKING_DIRECTORY:
+        required: false
         type: string
     secrets:
       AWS_ACCESS_KEY_ID:
