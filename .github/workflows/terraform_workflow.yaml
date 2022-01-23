@@ -42,7 +42,7 @@ jobs:
       - name: init
         run: |
           terraform init
-          echo "APPLY_ON_PR=${DESTROY_ON_MERGE:=false}" >> $GITHUB_ENV
+          echo "APPLY_ON_PR=${APPLY_ON_PR:=false}" >> $GITHUB_ENV
           echo "DESTROY_ON_MERGE=${DESTROY_ON_MERGE:=false}" >> $GITHUB_ENV
 
       - name: validate
