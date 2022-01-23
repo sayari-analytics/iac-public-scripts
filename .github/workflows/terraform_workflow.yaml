@@ -50,9 +50,9 @@ jobs:
         run: terraform plan -out="tfplan"
 
       - name: apply
-        if: ${{ inputs.APPLY_ON_PR }} || github.ref == 'refs/heads/main'
+        if: ${{ inputs.APPLY_ON_PR == 'true' }} || github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve "tfplan"
       
       - name: destroy
-        if: ${{ inputs.DESTROY_ON_MERGE }} && github.ref == 'refs/heads/main'
+        if: ${{ inputs.DESTROY_ON_MERGE == 'true' }} && github.ref == 'refs/heads/main'
         run: terraform destroy -input=false -auto-approve
