@@ -40,7 +40,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: init
-        run: terraform init
+        run: |
+          terraform init
+          echo "APPLY_ON_PR=${DESTROY_ON_MERGE:=false}" >> $GITHUB_ENV
+          echo "DESTROY_ON_MERGE=${DESTROY_ON_MERGE:=false}" >> $GITHUB_ENV
 
       - name: validate
         run: terraform validate -no-color
@@ -50,9 +53,9 @@ jobs:
         run: terraform plan -out="tfplan"
 
       - name: apply
-        if: ${{ inputs.APPLY_ON_PR == 'true' }} || github.ref == 'refs/heads/main'
+        if: env.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve "tfplan"
       
       - name: destroy
-        if: ${{ inputs.DESTROY_ON_MERGE == 'true' }} && github.ref == 'refs/heads/main'
+        if: env.DESTROY_ON_MERGE == 'true' && github.ref == 'refs/heads/main'
         run: terraform destroy -input=false -auto-approve
