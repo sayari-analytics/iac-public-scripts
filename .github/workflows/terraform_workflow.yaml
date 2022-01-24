@@ -10,6 +10,14 @@ on:
         required: false
         type: string
         default: "."
+      APPLY_ON_PR:
+        required: false
+        type: string
+        default: 'false'
+      DESTROY_ON_MERGE:
+        required: false
+        type: string
+        default: 'false'
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -20,6 +28,8 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: ${{ inputs.AWS_REGION }}
+  APPLY_ON_PR: ${{ inputs.APPLY_ON_PR }}
+  DESTROY_ON_MERGE: ${{ inputs.DESTROY_ON_MERGE }}
 
 jobs:
   deploy-terraform:
@@ -42,5 +52,9 @@ jobs:
         run: terraform plan -out="tfplan"
 
       - name: apply
-        if: github.ref == 'refs/heads/main'
+        if: env.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve "tfplan"
+      
+      - name: destroy
+        if: env.DESTROY_ON_MERGE == 'true' && github.ref == 'refs/heads/main'
+        run: terraform destroy -input=false -auto-approve
