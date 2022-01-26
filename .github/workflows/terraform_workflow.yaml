@@ -51,6 +51,8 @@ jobs:
           eval $(ssh-agent -s)
           ssh-add <(echo "${DEPLOY_KEY}")
           mkdir ~/.ssh
+          echo "${DEPLOY_KEY}" > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
           echo -e "Host github.com\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
           git clone -v git@github.com:sayari-analytics/mod-aws-vpc.git
           ls -l mod-aws-vpc/
