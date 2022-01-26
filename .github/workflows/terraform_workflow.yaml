@@ -47,8 +47,7 @@ jobs:
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         if: env.DEPLOY_KEY != ''
-        run: |
-          echo "DEPLOY_KEY exists"
+        run: ssh-add <(echo "${DEPLOY_KEY}")
 
       - name: init
         run: terraform init
