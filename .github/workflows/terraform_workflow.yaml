@@ -46,7 +46,7 @@ jobs:
       - name: add-deploy-key
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-        if: env.DEPLOY_KEY != ""
+        if: env.DEPLOY_KEY != ''
         run: |
           echo "DEPLOY_KEY exists"
 
