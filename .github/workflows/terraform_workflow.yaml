@@ -50,6 +50,8 @@ jobs:
         run: |
           eval $(ssh-agent -s)
           ssh-add <(echo "${DEPLOY_KEY}")
+          mkdir ~/.ssh
+          echo -e "Host github.com\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
       - name: init
         run: terraform init
