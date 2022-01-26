@@ -54,7 +54,7 @@ jobs:
           echo -e "Host github.com\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
       - name: init
-        run: terraform init
+        run: TF_LOG=DEBUG terraform init
 
       - name: validate
         run: terraform validate -no-color
