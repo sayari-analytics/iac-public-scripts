@@ -72,6 +72,6 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: tfplan-${{ github_run_id }}
+          name: tfplan-${{ env.github_run_id }}
           path: .terraform/
           if-no-files-found: error
