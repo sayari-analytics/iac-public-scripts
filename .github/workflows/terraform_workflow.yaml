@@ -69,3 +69,9 @@ jobs:
       - name: destroy
         if: env.DESTROY_ON_MERGE == 'true' && github.ref == 'refs/heads/main'
         run: terraform destroy -input=false -auto-approve
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: tfplan-${{ github_run_id }}
+          path: .terraform/
+          if-no-files-found: error
