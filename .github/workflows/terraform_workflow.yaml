@@ -71,7 +71,7 @@ jobs:
         run: terraform destroy -input=false -auto-approve
 
       - name: what file exists
-        run: ls -la; pwd
+        run: ls -la
 
       - upload artifacts
         uses: actions/upload-artifact@v2
