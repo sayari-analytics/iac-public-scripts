@@ -70,9 +70,6 @@ jobs:
         if: env.DESTROY_ON_MERGE == 'true' && github.ref == 'refs/heads/main'
         run: terraform destroy -input=false -auto-approve
 
-      - name: what file exists
-        run: ls -la; pwd
-
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
