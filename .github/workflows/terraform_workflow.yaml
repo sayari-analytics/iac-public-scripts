@@ -71,9 +71,9 @@ jobs:
         run: terraform destroy -input=false -auto-approve
 
       - name: what file exists
-        run: ls -la
+        run: ls -la; pwd
 
-      - upload artifacts
+      - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: tfplan-${{ env.github_run_id }}
