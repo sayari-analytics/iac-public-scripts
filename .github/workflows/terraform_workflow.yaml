@@ -71,11 +71,11 @@ jobs:
         run: terraform destroy -input=false -auto-approve
 
       - name: what file exists
-        run: ls -la $GITHUB_WORKSPACE; pwd
+        run: ls -la; pwd
 
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: tfplan-${{ env.github_run_id }}
-          path: ${{ github.workspace }}/.terraform/
+          path: ${{ github.workspace }}/${{ inputs.working_directory }}/.terraform/
           if-no-files-found: error
