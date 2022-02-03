@@ -76,3 +76,4 @@ jobs:
           name: tfplan-${{ github.run_id }}
           path: ${{ github.workspace }}/${{ inputs.working_directory }}/.terraform/
           if-no-files-found: error
+          retention-days: 1
