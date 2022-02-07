@@ -82,7 +82,10 @@ jobs:
           if-no-files-found: error
           retention-days: 1
   
-  configure-cluster:  
+  configure-cluster:
+    if: |
+      ( env.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main' ) 
+      && env.DESTROY_ON_MERGE != 'true'
     needs: create-cluster
     runs-on: ubuntu-latest
     steps:
@@ -100,8 +103,8 @@ jobs:
 
       - name: get kubeconfig
         run: |
+          CLUSTER_NAME=$(terraform output --raw cluster_name)
           if [ -z $CI_ROLE_ARN ]; then
-            CLUSTER_NAME=$(terraform output --raw cluster_name)
             CREDENTIALS=$(aws sts assume-role --role-arn ${CI_ROLE_ARN} --role-session-name iqt | jq -r '.Credentials') 
             export AWS_ACCESS_KEY_ID=$(echo ${CREDENTIALS} | jq -r '.AccessKeyId') 
             export AWS_SECRET_ACCESS_KEY=$(echo ${CREDENTIALS} | jq -r '.SecretAccessKey') 
