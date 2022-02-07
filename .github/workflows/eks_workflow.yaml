@@ -36,7 +36,7 @@ env:
   DESTROY_ON_MERGE: ${{ inputs.DESTROY_ON_MERGE }}
 
 jobs:
-  deploy-terraform:
+  create-cluster:
     defaults:
       run:
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
