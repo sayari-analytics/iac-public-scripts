@@ -74,6 +74,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: tfplan-${{ github.run_id }}
-          path: ${{ github.workspace }}/${{ inputs.working_directory }}/.terraform/
+          path: ${{ github.workspace }}/**/.terraform/
           if-no-files-found: error
           retention-days: 1
