@@ -9,7 +9,6 @@ on:
       WORKING_DIRECTORY:
         required: false
         type: string
-        default: ""
       APPLY_ON_PR:
         required: false
         type: string
