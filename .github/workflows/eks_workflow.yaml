@@ -103,7 +103,8 @@ jobs:
       - name: get kubeconfig
         run: |
           CLUSTER_NAME=$(terraform output --raw cluster_name)
-          if [ -z $CI_ROLE_ARN ]; then
+          if [[ -v ${CI_ROLE_ARN} ]]; then
+            echo "Assuming CI role"
             CREDENTIALS=$(aws sts assume-role --role-arn ${CI_ROLE_ARN} --role-session-name iqt | jq -r '.Credentials') 
             export AWS_ACCESS_KEY_ID=$(echo ${CREDENTIALS} | jq -r '.AccessKeyId') 
             export AWS_SECRET_ACCESS_KEY=$(echo ${CREDENTIALS} | jq -r '.SecretAccessKey') 
