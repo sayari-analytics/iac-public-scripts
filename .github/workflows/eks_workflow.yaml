@@ -1,0 +1,120 @@
+name: provision resources
+
+on:
+  workflow_call:
+    inputs:
+      AWS_REGION:
+        required: true
+        type: string
+      WORKING_DIRECTORY:
+        required: false
+        type: string
+        default: "."
+      APPLY_ON_PR:
+        required: false
+        type: string
+        default: 'false'
+      DESTROY_ON_MERGE:
+        required: false
+        type: string
+        default: 'false'
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      DEPLOY_KEY:
+        required: false
+      CI_ROLE_ARN:
+        required: false
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ inputs.AWS_REGION }}
+  APPLY_ON_PR: ${{ inputs.APPLY_ON_PR }}
+  DESTROY_ON_MERGE: ${{ inputs.DESTROY_ON_MERGE }}
+  CI_ROLE_ARN: ${{ secrets.CI_ROLE_ARN }}
+
+jobs:
+  create-cluster:
+    defaults:
+      run:
+        working-directory: ${{ inputs.WORKING_DIRECTORY }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: add-deploy-key
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        if: env.DEPLOY_KEY != ''
+        run: |
+          mkdir ~/.ssh
+          echo "${DEPLOY_KEY}" > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
+
+      - name: init
+        run: |
+          echo "WORKING_DIRECTORY=$(pwd)" >> $GITHUB_ENV 
+          terraform init
+
+      - name: validate
+        run: terraform validate -no-color
+
+      - name: plan
+        id: plan
+        run: terraform plan -out="tfplan"
+
+      - name: apply
+        if: env.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve "tfplan"
+      
+      - name: destroy
+        if: env.DESTROY_ON_MERGE == 'true' && github.ref == 'refs/heads/main'
+        run: terraform destroy -input=false -auto-approve
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: tfplan-${{ github.run_id }}
+          path: ${{ env.WORKING_DIRECTORY }}/.terraform/
+          if-no-files-found: error
+          retention-days: 1
+  
+  configure-cluster:
+    if: ( inputs.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main' ) && inputs.DESTROY_ON_MERGE != 'true'
+    needs: create-cluster
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      
+      - name: init
+        run: echo "WORKING_DIRECTORY=$(pwd)" >> $GITHUB_ENV
+
+      - name: get local state
+        uses: actions/download-artifact@v2
+        with:
+          name: tfplan-${{ github.run_id }}
+          path: ${{ env.WORKING_DIRECTORY }}/.terraform
+
+      - name: get kubeconfig
+        run: |
+          CLUSTER_NAME=$(terraform output --raw cluster_name)
+          if [[ ! -z ${CI_ROLE_ARN} ]]; then
+            echo "Assuming CI role"
+            CREDENTIALS=$(aws sts assume-role --role-arn ${CI_ROLE_ARN} --role-session-name iqt | jq -r '.Credentials') 
+            export AWS_ACCESS_KEY_ID=$(echo ${CREDENTIALS} | jq -r '.AccessKeyId') 
+            export AWS_SECRET_ACCESS_KEY=$(echo ${CREDENTIALS} | jq -r '.SecretAccessKey') 
+            export AWS_SESSION_TOKEN=$(echo ${CREDENTIALS} | jq -r '.SessionToken')
+            aws eks update-kubeconfig --name=${CLUSTER_NAME} --region=${AWS_REGION} --role-arn ${CI_ROLE_ARN}
+          else
+            aws eks update-kubeconfig --name=${CLUSTER_NAME} --region=${AWS_REGION}
+          fi
+    
+      - name: configure cluster
+        run: |
+          kubectl version
+          terraform output --raw aws_auth_configmap | kubectl apply -f - -n kube-system
