@@ -70,10 +70,6 @@ jobs:
       - name: apply
         if: env.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve "tfplan"
-      
-      - name: destroy
-        if: env.DESTROY_ON_MERGE == 'true' && github.ref == 'refs/heads/main'
-        run: terraform destroy -input=false -auto-approve
 
       - name: upload artifacts
         uses: actions/upload-artifact@v2
