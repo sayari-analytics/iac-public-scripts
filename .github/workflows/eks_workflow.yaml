@@ -70,10 +70,6 @@ jobs:
       - name: apply
         if: env.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve "tfplan"
-      
-      - name: destroy
-        if: env.DESTROY_ON_MERGE == 'true' && github.ref == 'refs/heads/main'
-        run: terraform destroy -input=false -auto-approve
 
       - name: upload artifacts
         uses: actions/upload-artifact@v2
@@ -84,7 +80,7 @@ jobs:
           retention-days: 1
   
   configure-cluster:
-    if: ( inputs.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main' ) && inputs.DESTROY_ON_MERGE != 'true'
+    if: inputs.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main'
     needs: create-cluster
     runs-on: ubuntu-latest
     steps:
@@ -118,3 +114,23 @@ jobs:
         run: |
           kubectl version
           terraform output --raw aws_auth_configmap | kubectl apply -f - -n kube-system
+
+  destroy-cluster:
+    if: inputs.DESTROY_ON_MERGE == 'true' && github.ref == 'refs/heads/main'
+    needs: configure-cluster
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: init
+        run: echo "WORKING_DIRECTORY=$(pwd)" >> $GITHUB_ENV
+
+      - name: get local state
+        uses: actions/download-artifact@v2
+        with:
+          name: tfplan-${{ github.run_id }}
+          path: ${{ env.WORKING_DIRECTORY }}/.terraform
+
+      - name: destroy
+        run: terraform destroy -input=false -auto-approve
