@@ -139,4 +139,6 @@ jobs:
           path: ${{ env.WORKING_DIRECTORY }}/.terraform
 
       - name: destroy
-        run: terraform destroy -input=false -auto-approve
+        run: |
+          terraform init
+          terraform destroy -input=false -auto-approve
