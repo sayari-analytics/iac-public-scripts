@@ -119,6 +119,9 @@ jobs:
           terraform output --raw aws_auth_configmap | kubectl apply -f - -n kube-system
 
   destroy-cluster:
+    defaults:
+      run:
+        working-directory: ${{ inputs.WORKING_DIRECTORY }}
     if: inputs.DESTROY_ON_MERGE == 'true' && github.ref == 'refs/heads/main'
     needs: configure-cluster
     runs-on: ubuntu-latest
