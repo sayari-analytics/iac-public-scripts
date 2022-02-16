@@ -80,6 +80,9 @@ jobs:
           retention-days: 1
   
   configure-cluster:
+    defaults:
+      run:
+        working-directory: ${{ inputs.WORKING_DIRECTORY }}
     if: inputs.APPLY_ON_PR == 'true' || github.ref == 'refs/heads/main'
     needs: create-cluster
     runs-on: ubuntu-latest
